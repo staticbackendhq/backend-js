@@ -1,0 +1,31 @@
+{
+  "name": "@staticbackend/js",
+  "version": "1.0.0",
+  "description": "JavaScript client library for StaticBackend",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "rm -rf libs/* && tsc && parcel build src/index.ts && cp lib/*.d.ts dist/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/staticbackendhq/backend-js.git"
+  },
+  "keywords": [
+    "StaticBackend"
+  ],
+  "author": "Dominic St-Pierre",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/staticbackendhq/backend-js/issues"
+  },
+  "homepage": "https://github.com/staticbackendhq/backend-js#readme",
+  "devDependencies": {
+    "parcel": "^1.12.4",
+    "typescript": "^4.1.3"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
+}
