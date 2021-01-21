@@ -1,6 +1,34 @@
+export interface Payload {
+	sid: string;
+	type: string;
+	data: string;
+	channel: string;
+	token: string;
+}
+
 export class Backend {
 	private baseURL: string = "https://na1.staticbackend.com";
+	private wsURL: string = "wss://na1.staticbackend.com";
+	private ws: WebSocket = null;
+	private wsId: string = null;
+	private wsToken: string = null;
 	private pubKey: string = "";
+
+	types = {
+		ok: "ok",
+		error: "error",
+		init: "init",
+		token: "token",
+		joined: "joined",
+		chanOut: "chan_out",
+		dbCreated: "db_created",
+		dbUpdated: "db_updated",
+		dbDeleted: "db_deleted",
+		echo: "echo",
+		auth: "auth",
+		join: "join",
+		chanIn: "chan_in"
+	}
 
 	constructor(key: string, region: string) {
 		this.pubKey = key;
@@ -8,11 +36,14 @@ export class Backend {
 		if (region) {
 			if (region == "dev") {
 				this.baseURL = "http://localhost:8099";
+				this.wsURL = "ws://localhost:8099";
 			} else if (region.length < 10) {
 				this.baseURL = `https://${region}.staticbackend.com`;
+				this.wsURL = `wss://${region}.staticbackend.com`;
 			} else {
 				// custom base URL
 				this.baseURL = region;
+				this.wsURL = region.replace("https", "wss");
 			}
 		}
 	}
@@ -97,5 +128,44 @@ export class Backend {
 	async storeFile(token: string, form: HTMLFormElement) {
 		let fd = new FormData(form);
 		return await this.rawreq("", token, "POST", "/storage/upload", fd);
+	}
+
+	connect(token: string, onAuth: (tok: string) => void, onMessage: (pl: Payload) => void) {
+		this.ws = new WebSocket(this.wsURL+"/ws");
+
+		this.ws.onerror = (e) => { console.error(e); }
+		this.ws.onmessage = (e) => {
+			try {
+				let pl: Payload = JSON.parse(e.data);
+				// for the init msg we authenticate the connection
+				if (pl.type == this.types.init) {
+					this.wsId = pl.data;
+					this.send(this.types.auth, token);
+				} else if (pl.type == this.types.token) {
+					this.wsToken = pl.data;
+					onAuth(pl.data);
+				} else {
+					onMessage(pl);
+				}
+			} catch(ex) {
+				console.error(ex);
+			}
+		}
+	}
+
+	send(t: string, data: string, channel?: string): boolean {
+		if (this.ws == null) {
+			return false;
+		}
+
+		let pl: Payload = {
+			sid: this.wsId,
+			token: this.wsToken,
+			type: t,
+			data: data,
+			channel: channel
+		}
+		this.ws.send(JSON.stringify(pl));
+		return true;
 	}
 }
