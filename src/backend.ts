@@ -12,6 +12,7 @@ export class Backend {
 	private ws: WebSocket = null;
 	private wsId: string = null;
 	private wsToken: string = null;
+	private sseClient = null;
 	private pubKey: string = "";
 
 	types = {
@@ -82,7 +83,7 @@ export class Backend {
 			content = await resp.json();
 			return { ok: true, content: content };
 		} catch (err) {
-			console.log(err);
+			console.error(err);
 			return { ok: false, content: err };
 		}
 	}
@@ -130,8 +131,8 @@ export class Backend {
 		return await this.rawreq("", token, "POST", "/storage/upload", fd);
 	}
 
-	connect(token: string, onAuth: (tok: string) => void, onMessage: (pl: Payload) => void) {
-		this.ws = new WebSocket(this.wsURL+"/ws");
+	connectWS(token: string, onAuth: (tok: string) => void, onMessage: (pl: Payload) => void) {
+		this.ws = new WebSocket(this.wsURL + "/ws");
 
 		this.ws.onerror = (e) => { console.error(e); }
 		this.ws.onmessage = (e) => {
@@ -147,13 +148,13 @@ export class Backend {
 				} else {
 					onMessage(pl);
 				}
-			} catch(ex) {
+			} catch (ex) {
 				console.error(ex);
 			}
 		}
 	}
 
-	send(t: string, data: string, channel?: string): boolean {
+	sendWS(t: string, data: string, channel?: string): boolean {
 		if (this.ws == null) {
 			return false;
 		}
@@ -168,4 +169,51 @@ export class Backend {
 		this.ws.send(JSON.stringify(pl));
 		return true;
 	}
+
+	connect(token: string, onAuth: (tok: string) => void, onMessage: (pl: Payload) => void) {
+		this.sseClient = new EventSource(this.baseURL + "/sse/connect");
+
+
+
+		this.sseClient.onerror = (e) => { console.error(e); }
+		this.sseClient.onmessage = (e) => {
+			try {
+				let pl: Payload = JSON.parse(e.data);
+				// for the init msg we authenticate the connection
+				if (pl.type == this.types.init) {
+					this.wsId = pl.data;
+					this.wsToken = token;
+					this.send(this.types.auth, token);
+				} else if (pl.type == this.types.token) {
+					//this.wsToken = pl.data;
+					onAuth(this.wsToken);
+				} else {
+					onMessage(pl);
+				}
+			} catch (ex) {
+				console.error(ex);
+			}
+		}
+	}
+
+	send(t: string, data: string, channel?: string): boolean {
+		if (this.sseClient == null || this.sseClient.readyState == 2) {
+			return false;
+		}
+
+		let pl: Payload = {
+			sid: this.wsId,
+			token: this.wsToken,
+			type: t,
+			data: data,
+			channel: channel
+		};
+
+		(async () => {
+			return await this.req(this.wsToken, "POST", "/sse/msg", pl);
+		})();
+
+		return true;
+	}
+
 }
