@@ -28,7 +28,8 @@ export class Backend {
 		echo: "echo",
 		auth: "auth",
 		join: "join",
-		chanIn: "chan_in"
+		chanIn: "chan_in",
+		presence: "presence"
 	}
 
 	constructor(key: string, region: string) {
@@ -131,6 +132,12 @@ export class Backend {
 		return await this.rawreq("", token, "POST", "/storage/upload", fd);
 	}
 
+	async resizeImage(token: string, maxWidth: number, form: HTMLFormElement) {
+		let fd = new FormData(form);
+		fd.append("width", maxWidth.toString());
+		return await this.rawreq("", token, "POST", "/extra/resizeimg", fd);
+	}
+
 	connectWS(token: string, onAuth: (tok: string) => void, onMessage: (pl: Payload) => void) {
 		this.ws = new WebSocket(this.wsURL + "/ws");
 
@@ -171,7 +178,7 @@ export class Backend {
 	}
 
 	connect(token: string, onAuth: (tok: string) => void, onMessage: (pl: Payload) => void) {
-		this.sseClient = new EventSource(this.baseURL + "/sse/connect");
+		this.sseClient = new EventSource(this.baseURL + `/sse/connect?sbpk=${this.pubKey}`);
 
 
 

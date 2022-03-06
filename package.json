@@ -1,6 +1,6 @@
 {
   "name": "@staticbackend/js",
-  "version": "1.0.1",
+  "version": "1.2.0",
   "description": "JavaScript client library for StaticBackend",
   "main": "dist/index.js",
   "scripts": {
