@@ -6,6 +6,12 @@ export interface Payload {
 	token: string;
 }
 
+export interface ConvertData {
+	toPDF: boolean;
+	url: string;
+	fullpage: boolean;
+}
+
 export class Backend {
 	private baseURL: string = "https://na1.staticbackend.com";
 	private wsURL: string = "wss://na1.staticbackend.com";
@@ -136,6 +142,10 @@ export class Backend {
 		let fd = new FormData(form);
 		fd.append("width", maxWidth.toString());
 		return await this.rawreq("", token, "POST", "/extra/resizeimg", fd);
+	}
+
+	async convertURLToX(token: string, data: ConvertData) {
+		return await this.req(token, "POST", "/extra/htmltox", data);
 	}
 
 	connectWS(token: string, onAuth: (tok: string) => void, onMessage: (pl: Payload) => void) {
