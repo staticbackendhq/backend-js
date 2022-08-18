@@ -12,6 +12,20 @@ export interface ConvertData {
 	fullpage: boolean;
 }
 
+export interface ExternalUser {
+	token: string;
+	email: string;
+	name: string;
+	first: string;
+	last: string;
+	avatarUrl: string;
+}
+
+export interface BulkUpdate {
+	update: any;
+	clauses: Array<Array<any>>;
+}
+
 export class Backend {
 	private baseURL: string = "https://na1.staticbackend.com";
 	private wsURL: string = "wss://na1.staticbackend.com";
@@ -113,6 +127,10 @@ export class Backend {
 		return await this.req(token, "POST", `/db/${repo}`, doc)
 	}
 
+	async createBulk(token: string, repo: string, docs: Array<any>) {
+		return await this.req(token, "POST", `/db/${repo}?bulk=1`, docs)
+	}
+
 	async list(token: string, repo: string) {
 		return await this.req(token, "GET", `/db/${repo}`);
 	}
@@ -127,6 +145,10 @@ export class Backend {
 
 	async update(token: string, repo: string, id: string, doc) {
 		return await this.req(token, "PUT", `/db/${repo}/${id}`, doc)
+	}
+
+	async updateBulk(token: string, repo: string, data: BulkUpdate) {
+		return await this.req(token, "PUT", `/db/${repo}?bulk=1`, data);
 	}
 
 	async delete(token: string, repo: string, id: string) {
@@ -233,4 +255,42 @@ export class Backend {
 		return true;
 	}
 
+	private generateId(): string {
+		let dt = new Date().getTime();
+		let uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+			let r = (dt + Math.random() * 16) % 16 | 0;
+			dt = Math.floor(dt / 16);
+			return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+		});
+		return "R" + uuid;
+	}
+
+
+	async socialLogin(provider: "twitter" | "google" | "facebook"): Promise<ExternalUser> {
+		const reqId = this.generateId();
+		console.log("reqid", reqId);
+		
+		const url = `${this.baseURL}/oauth/login?provider=${provider}&reqid=${reqId}&sbpk=${this.pubKey}`;
+		window.open(url, "_blank");
+
+		return await this.checkExternalUser(1, reqId);
+	}
+
+	private timeout = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+	private async checkExternalUser(count: number, reqId: string): Promise<ExternalUser> {
+		if (count >= 950) { 
+			return {token: "", email: "", name: "", first: "", last: "", avatarUrl: ""};
+		}
+
+		const res = await this.req("", "GET", `/oauth/get-user?reqid=${reqId}`);
+		if (!res.ok) {
+			count++;
+			await this.timeout(1750);
+			return await this.checkExternalUser(count, reqId);
+		}
+
+		const user = res.content as ExternalUser;
+		return user;
+	}
 }

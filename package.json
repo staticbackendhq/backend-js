@@ -4,7 +4,8 @@
   "description": "JavaScript client library for StaticBackend",
   "main": "dist/index.js",
   "scripts": {
-    "build": "rm -rf libs/* && tsc && parcel build src/index.ts && cp lib/*.d.ts dist/"
+    "build": "rm -rf libs/* && tsc && parcel build src/index.ts && cp lib/*.d.ts dist/",
+    "build:module": "tsc -p tsconfig-module.json"
   },
   "repository": {
     "type": "git",
