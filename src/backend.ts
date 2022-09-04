@@ -123,6 +123,10 @@ export class Backend {
 		return await this.req("", "POST", "/login", body);
 	}
 
+	async me(token) {
+		return await this.req(token, "GET", "/me");
+	}
+
 	async create(token: string, repo: string, doc) {
 		return await this.req(token, "POST", `/db/${repo}`, doc)
 	}
@@ -268,8 +272,7 @@ export class Backend {
 
 	async socialLogin(provider: "twitter" | "google" | "facebook"): Promise<ExternalUser> {
 		const reqId = this.generateId();
-		console.log("reqid", reqId);
-		
+	
 		const url = `${this.baseURL}/oauth/login?provider=${provider}&reqid=${reqId}&sbpk=${this.pubKey}`;
 		window.open(url, "_blank");
 
@@ -284,7 +287,11 @@ export class Backend {
 		}
 
 		const res = await this.req("", "GET", `/oauth/get-user?reqid=${reqId}`);
-		if (!res.ok) {
+		// the API will return: false as content if user hasn't completed the
+		// process yet.
+		// TODO: when a real error occur !res.ok, might be better to stop and 
+		// notify the caller.
+		if (!res.ok || !res.content) {
 			count++;
 			await this.timeout(1750);
 			return await this.checkExternalUser(count, reqId);
