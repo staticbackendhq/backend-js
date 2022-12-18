@@ -159,6 +159,10 @@ export class Backend {
 		return await this.req(token, "DELETE", `/db/${repo}/${id}`);
 	}
 
+	async count(token: string, repo: string, filters) {
+		return await this.req(token, "POST", `/db/count/${repo}`, filters);
+	}
+
 	async storeFile(token: string, form: HTMLFormElement) {
 		let fd = new FormData(form);
 		return await this.rawreq("", token, "POST", "/storage/upload", fd);
