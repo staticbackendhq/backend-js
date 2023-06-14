@@ -207,6 +207,15 @@ export class Backend {
     return await this.req(token, "POST", "/extra/htmltox", data);
   }
 
+  async publish(token: string, channel: string, type: string, data: any) {
+    const payload = {
+      channel: channel,
+      type: type,
+      data: data,
+    };
+    return await this.req(token, "POST", "/publish", payload);
+  }
+
   connectWS(
     token: string,
     onAuth: (tok: string) => void,
