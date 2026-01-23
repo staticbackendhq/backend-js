@@ -1,10 +1,10 @@
 # @staticbackend/js
-[StaticBackend](https://staticbackend.com)'s JavaScript client library.
+[StaticBackend](https://staticbackend.dev)'s JavaScript client library.
 
 ### Installation
 
 ```shell
-$> npm install @staticbackend/js
+npm install @staticbackend/js@latest
 ```
 
 ### Usage
@@ -13,7 +13,36 @@ $> npm install @staticbackend/js
 import { Backend } from "@staticbackend/js";
 
 const bkn = new Backend("your-public-token", "na1");
+
+_Use "dev" instead of "na1" when using the dev server as region_
 ```
+
+### TypeScript Support
+
+This library is written in TypeScript and includes type definitions. Types are automatically available when you import the library:
+
+```typescript
+import { Backend } from "@staticbackend/js";
+
+const bkn = new Backend("your-public-token", "na1");
+// All methods are fully typed with IntelliSense support
+```
+
+### Browser Usage (without bundler)
+
+You can also use this library directly in the browser via CDN:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@staticbackend/js@1.5.0/dist/backend.js"></script>
+<script>
+  const bkn = new sb.Backend("your-public-token", "na1");
+
+  // Now use the API
+  const result = await bkn.login("user@example.com", "password");
+</script>
+```
+
+The browser bundle exposes a global `sb` object with the `Backend` class.
 
 **Parameters**:
 
@@ -28,7 +57,7 @@ You may initiate the client like this for development:
 const bkn = new Backend("anything", "dev");
 ```
 
-When using the development server you don't need a valid public key.
+When using the development server you can use the `dev_memory_pk` public key.
 
 ### Available helpers
 

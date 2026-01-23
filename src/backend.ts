@@ -27,8 +27,8 @@ export interface BulkUpdate {
 }
 
 export class Backend {
-  private baseURL: string = "https://na1.staticbackend.com";
-  private wsURL: string = "wss://na1.staticbackend.com";
+  private baseURL: string = "https://na1.staticbackend.dev";
+  private wsURL: string = "wss://na1.staticbackend.dev";
   private ws: WebSocket = null;
   private wsId: string = null;
   private wsToken: string = null;
@@ -60,8 +60,8 @@ export class Backend {
         this.baseURL = "http://localhost:8099";
         this.wsURL = "ws://localhost:8099";
       } else if (region.length < 10) {
-        this.baseURL = `https://${region}.staticbackend.com`;
-        this.wsURL = `wss://${region}.staticbackend.com`;
+        this.baseURL = `https://${region}.staticbackend.dev`;
+        this.wsURL = `wss://${region}.staticbackend.dev`;
       } else {
         // custom base URL
         this.baseURL = region;
@@ -75,7 +75,7 @@ export class Backend {
     token: string,
     method: string,
     path: string,
-    body?: any
+    body?: any,
   ) {
     try {
       let rawBody = null;
@@ -219,7 +219,7 @@ export class Backend {
   connectWS(
     token: string,
     onAuth: (tok: string) => void,
-    onMessage: (pl: Payload) => void
+    onMessage: (pl: Payload) => void,
   ) {
     this.ws = new WebSocket(this.wsURL + "/ws");
 
@@ -264,10 +264,10 @@ export class Backend {
   connect(
     token: string,
     onAuth: (tok: string) => void,
-    onMessage: (pl: Payload) => void
+    onMessage: (pl: Payload) => void,
   ) {
     this.sseClient = new EventSource(
-      this.baseURL + `/sse/connect?sbpk=${this.pubKey}`
+      this.baseURL + `/sse/connect?sbpk=${this.pubKey}`,
     );
 
     this.sseClient.onerror = (e) => {
@@ -318,16 +318,16 @@ export class Backend {
     let uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
       /[xy]/g,
       function (c) {
-        let r = (dt + Math.random() * 16) % 16 | 0;
+        let r = ((dt + Math.random() * 16) % 16) | 0;
         dt = Math.floor(dt / 16);
         return (c == "x" ? r : (r & 0x3) | 0x8).toString(16);
-      }
+      },
     );
     return "R" + uuid;
   }
 
   async socialLogin(
-    provider: "twitter" | "google" | "facebook"
+    provider: "twitter" | "google" | "facebook",
   ): Promise<ExternalUser> {
     const reqId = this.generateId();
 
@@ -341,7 +341,7 @@ export class Backend {
 
   private async checkExternalUser(
     count: number,
-    reqId: string
+    reqId: string,
   ): Promise<ExternalUser> {
     if (count >= 950) {
       return {

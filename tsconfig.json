@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"outDir": "./lib",
+		"outDir": "./dist/types-temp",
 		"target": "es2015",
 		"module": "commonjs",
 		"noImplicitAny": false,
