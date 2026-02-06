@@ -1,3 +1,7 @@
+export type Operator = "==" | "!=" | "<" | "<=" | ">" | ">=" | "in" | "!in";
+
+export type Filter = [string, Operator, any];
+
 export interface Payload {
   sid: string;
   type: string;
@@ -162,7 +166,7 @@ export class Backend {
     return await this.req(token, "GET", `/db/${repo}/${id}`);
   }
 
-  async query(token: string, repo: string, filters) {
+  async query(token: string, repo: string, filters: Filter[]) {
     return await this.req(token, "POST", `/query/${repo}`, filters);
   }
 
@@ -178,12 +182,12 @@ export class Backend {
     return await this.req(token, "DELETE", `/db/${repo}/${id}`);
   }
 
-  async deleteBulk(token: string, repo: string, filters) {
+  async deleteBulk(token: string, repo: string, filters: Filter[]) {
     const x = btoa(JSON.stringify(filters));
     return await this.req(token, "DELETE", `/db/${repo}?bulk=1&x=${x}`);
   }
 
-  async count(token: string, repo: string, filters) {
+  async count(token: string, repo: string, filters: Filter[]) {
     return await this.req(token, "POST", `/db/count/${repo}`, filters);
   }
 
