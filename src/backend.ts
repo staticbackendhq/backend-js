@@ -166,6 +166,10 @@ export class Backend {
     return await this.req(token, "GET", `/db/${repo}/${id}`);
   }
 
+  async getByIds(token: string, repo: string, ids: string[]) {
+    return await this.req(token, "POST", `/db/${repo}?ids=true`, ids);
+  }
+
   async query(token: string, repo: string, filters: Filter[]) {
     return await this.req(token, "POST", `/query/${repo}`, filters);
   }

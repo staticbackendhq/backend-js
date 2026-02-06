@@ -1,1 +1,9 @@
-export { Backend } from "./backend";
+export {
+  Backend,
+  type Operator,
+  type Filter,
+  type Payload,
+  type ConvertData,
+  type ExternalUser,
+  type BulkUpdate,
+} from "./backend";
