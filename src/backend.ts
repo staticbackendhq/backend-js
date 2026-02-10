@@ -3,9 +3,9 @@ export type Operator = "==" | "!=" | "<" | "<=" | ">" | ">=" | "in" | "!in";
 export type Filter = [string, Operator, any];
 
 export interface ListParams {
-  page: number;
-  size: number;
-  desc: boolean;
+  page?: number;
+  size?: number;
+  desc?: boolean;
 }
 
 export interface Payload {
@@ -134,18 +134,21 @@ export class Backend {
       return "";
     }
 
-    let url = "?";
+    const parts: string[] = [];
+
     if (params.page > 0) {
-      url += `page=${params.page}&`;
+      parts.push(`page=${params.page}`);
     }
 
     if (params.size > 1) {
-      url += `size=${params.size}&`;
+      parts.push(`size=${params.size}`);
     }
 
     if (params.desc) {
-      url += "desc=true";
+      parts.push("desc=true");
     }
+
+    return parts.length > 0 ? `?${parts.join("&")}` : "";
   }
 
   async register(email: string, pw: string) {
