@@ -2,6 +2,12 @@ export type Operator = "==" | "!=" | "<" | "<=" | ">" | ">=" | "in" | "!in";
 
 export type Filter = [string, Operator, any];
 
+export interface ListParams {
+  page: number;
+  size: number;
+  desc: boolean;
+}
+
 export interface Payload {
   sid: string;
   type: string;
@@ -123,6 +129,25 @@ export class Backend {
     return await this.rawreq("application/json", token, method, path, body);
   }
 
+  private listParamsToUrl(params?: ListParams): string {
+    if (!params) {
+      return "";
+    }
+
+    let url = "?";
+    if (params.page > 0) {
+      url += `page=${params.page}&`;
+    }
+
+    if (params.size > 1) {
+      url += `size=${params.size}&`;
+    }
+
+    if (params.desc) {
+      url += "desc=true";
+    }
+  }
+
   async register(email: string, pw: string) {
     const body = { email: email, password: pw };
     return await this.req("", "POST", "/register", body);
@@ -158,8 +183,9 @@ export class Backend {
     return await this.req(token, "POST", `/db/${repo}?bulk=1`, docs);
   }
 
-  async list(token: string, repo: string) {
-    return await this.req(token, "GET", `/db/${repo}`);
+  async list(token: string, repo: string, params?: ListParams) {
+    let url = `/db/${repo}` + this.listParamsToUrl(params);
+    return await this.req(token, "GET", url);
   }
 
   async getById(token: string, repo: string, id: string) {
@@ -170,8 +196,14 @@ export class Backend {
     return await this.req(token, "POST", `/db/${repo}?ids=true`, ids);
   }
 
-  async query(token: string, repo: string, filters: Filter[]) {
-    return await this.req(token, "POST", `/query/${repo}`, filters);
+  async query(
+    token: string,
+    repo: string,
+    filters: Filter,
+    params?: ListParams,
+  ) {
+    const url = `/query/${repo}` + this.listParamsToUrl(params);
+    return await this.req(token, "POST", url, filters);
   }
 
   async update(token: string, repo: string, id: string, doc) {
