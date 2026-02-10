@@ -7,4 +7,5 @@ export {
   type ExternalUser,
   type BulkUpdate,
   type ListParams,
+  type UploadedFile,
 } from "./backend";

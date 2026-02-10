@@ -36,6 +36,11 @@ export interface BulkUpdate {
   clauses: Array<Array<any>>;
 }
 
+export interface UploadedFile {
+  id: string;
+  url: string;
+}
+
 export class Backend {
   private baseURL: string = "https://na1.staticbackend.dev";
   private wsURL: string = "wss://na1.staticbackend.dev";
@@ -238,6 +243,18 @@ export class Backend {
   async storeFile(token: string, form: HTMLFormElement) {
     let fd = new FormData(form);
     return await this.rawreq("", token, "POST", "/storage/upload", fd);
+  }
+
+  async uploadFile(token: string, file: File): Promise<UploadedFile> {
+    const fd = new FormData();
+    fd.append("file", file);
+    const result = await this.rawreq("", token, "POST", "/storage/upload", fd);
+
+    if (!result.ok) {
+      throw new Error(`File upload failed: ${result.content}`);
+    }
+
+    return result.content as UploadedFile;
   }
 
   async resizeImage(token: string, maxWidth: number, form: HTMLFormElement) {
