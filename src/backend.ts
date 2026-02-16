@@ -207,7 +207,7 @@ export class Backend {
   async query(
     token: string,
     repo: string,
-    filters: Filter,
+    filters: Filter[],
     params?: ListParams,
   ) {
     const url = `/query/${repo}` + this.listParamsToUrl(params);
