@@ -8,4 +8,8 @@ export {
   type BulkUpdate,
   type ListParams,
   type UploadedFile,
+  type FileUsage,
+  type StoredFile,
+  type StorageListParams,
+  type FileListResult,
 } from "./backend";

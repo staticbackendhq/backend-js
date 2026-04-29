@@ -41,6 +41,31 @@ export interface UploadedFile {
   url: string;
 }
 
+export interface FileUsage {
+  bytes: number;
+  gb: number;
+}
+
+export interface StoredFile {
+  id: string;
+  accountId: string;
+  key: string;
+  url: string;
+  size: number;
+  uploaded: string;
+}
+
+export interface StorageListParams extends ListParams {
+  sort?: "size";
+}
+
+export interface FileListResult {
+  page: number;
+  size: number;
+  total: number;
+  results: StoredFile[];
+}
+
 export class Backend {
   private baseURL: string = "https://na1.staticbackend.dev";
   private wsURL: string = "wss://na1.staticbackend.dev";
@@ -161,8 +186,8 @@ export class Backend {
     return await this.req("", "POST", "/register", body);
   }
 
-  async login(email: string, pw: string) {
-    const body = { email: email, password: pw };
+  async login(email: string, pw: string, accountId?: string) {
+    const body = { email: email, password: pw, accountId: accountId };
     return await this.req("", "POST", "/login", body);
   }
 
@@ -255,6 +280,21 @@ export class Backend {
     }
 
     return result.content as UploadedFile;
+  }
+
+  async storageUsage(token: string) {
+    return await this.req(token, "GET", "/storage/usage");
+  }
+
+  async listFiles(token: string, params?: StorageListParams) {
+    let url = `/storage/files` + this.listParamsToUrl(params);
+
+    if (params?.sort) {
+      url += url.includes("?") ? "&" : "?";
+      url += `sort=${params.sort}`;
+    }
+
+    return await this.req(token, "GET", url);
   }
 
   async resizeImage(token: string, maxWidth: number, form: HTMLFormElement) {
